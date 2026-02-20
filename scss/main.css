@@ -12003,6 +12003,7 @@ p {
 
 .hero-scene {
   position: relative;
+  margin-bottom: 15px;
 }
 .hero-scene::before {
   content: "";
@@ -12032,11 +12033,15 @@ p {
 
 .image-card {
   position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  cursor: pointer;
 }
 .image-card:hover .titre-image {
   opacity: 1;
 }
 .image-card:hover img {
+  transform: scale(1.08);
   filter: brightness(0.3);
 }
 .image-card img {
@@ -12048,10 +12053,18 @@ p {
   left: 50%;
   transform: translate(-50%, -50%);
   opacity: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  transition: all 0.3s ease;
 }
 
 .image-card img {
   height: 250px;
   -o-object-fit: cover;
      object-fit: cover;
+}
+
+.form-label {
+  color: #906427;
 }/*# sourceMappingURL=main.css.map */

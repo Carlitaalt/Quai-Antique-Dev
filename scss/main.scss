@@ -25,6 +25,7 @@ p {
 
 .hero-scene {
     position: relative;
+    margin-bottom: 15px;
     &::before {
         content: "";
         position: absolute;
@@ -57,11 +58,15 @@ p {
 
 .image-card {
     position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    cursor: pointer;
     &:hover {
         .titre-image {
             opacity: 1;
         }
         img {
+            transform: scale(1.08);
             filter: brightness(0.3);
         }
 
@@ -76,11 +81,18 @@ p {
         left: 50%;
         transform: translate(-50%, -50%);
         opacity: 0;
-
+        font-size: 1.5rem;
+        font-weight: 600;
+        letter-spacing: 2px;
+        transition: all 0.3s ease;
     }
 }
 
 .image-card img {
     height: 250px;
     object-fit: cover;
+}
+
+.form-label {
+    color: $primary;
 }

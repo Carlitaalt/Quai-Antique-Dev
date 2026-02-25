@@ -6,12 +6,14 @@ const inputEmail = document.getElementById("EmailInput");
 const inputPassword = document.getElementById("PasswordInput");
 const inputValidatePassword = document.getElementById("ValidatePasswordInput");
 const btnValidation = document.getElementById("btn-validation-inscription");
+const formInscription = document.getElementById("formulaireInscription");
 
 inputNom.addEventListener("keyup", validateForm);
 inputPrenom.addEventListener("keyup", validateForm);
 inputEmail.addEventListener("keyup", validateForm);
 inputPassword.addEventListener("keyup", validateForm);
 inputValidatePassword.addEventListener("keyup", validateForm);
+btnValidation.addEventListener("click", InscrireUtilisateur);
 
 //Function permettant de valider tout le formulaire
 function validateForm() {
@@ -81,4 +83,53 @@ function validateRequired(input) {
         input.classList.add("is-invalid");
         return false;
     }
+}
+
+function InscrireUtilisateur(){
+    let dataForm = new FormData(formInscription);
+
+    let myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("Origin", "http://localhost:3000");
+
+    let raw = JSON.stringify({
+        "firstName": dataForm.get("nom"),
+        "lastName": dataForm.get("prenom"),
+        "email": dataForm.get("email"),
+        "password": dataForm.get("mdp")
+    });
+
+    let requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow'
+    };
+
+    fetch(apiUrl+"registration", requestOptions)
+        .then(response => {
+            // D'abord récupérer le texte brut
+            return response.text().then(text => {
+                // Nettoyer le texte des erreurs PHP/warnings
+                const cleanText = text.replace(/<br\s*\/?>|<b>.*?<\/b>/gi, '').trim();
+                
+                // Essayer de parser en JSON seulement si le texte n'est pas vide et commence par {
+                if(cleanText && cleanText.startsWith('{')) {
+                    return { ok: response.ok, data: JSON.parse(cleanText) };
+                }
+                // Sinon retourner le texte brut
+                return { ok: response.ok, text: cleanText };
+            });
+        })
+        .then(result => {
+            if(result.ok){
+                alert("Bravo "+dataForm.get("prenom")+", vous êtes inscrit ! Vous allez être redirigé vers la page de connexion");
+                setTimeout(() => {
+                    document.location.href = "/signin";
+                }, 2000);
+            } else {
+                alert("Une erreur est survenue lors de l'inscription. Veuillez réessayer.");
+            }
+        })
+        .catch(error => console.log('error', error));
 }

@@ -1,23 +1,61 @@
 const mailInput = document.getElementById("EmailInput");
 const PasswordInput = document.getElementById("PasswordInput");
 const btnSignin = document.getElementById("btnSignin");
+const signinForm = document.getElementById("signinForm");
 
 btnSignin.addEventListener("click", checkCredentials);
 
 function checkCredentials(){
-    //Ici, il faudra appeler l'API pour vérifier les identifiants en BDD
+    let dataForm = new FormData(signinForm);
 
-    if(mailInput.value == "test@mail.com" && PasswordInput.value == "123"){
+    let myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("Origin", "http://localhost:3000");
 
-        //Il faudra récupérer le vrai token
-        const token = "ohviuferhgrremghjotie"
-        setToken(token);
-        //placer ce token en cookie
+    let raw = JSON.stringify({
+        "username": dataForm.get("email"),
+        "password": dataForm.get("mdp")
+    });
 
-        setCookie(roleCookieName, "client", 7);
-        window.location.replace("/");
-    } else {
-        mailInput.classList.add("is-invalid");
-        PasswordInput.classList.add("is-invalid");
+    let requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow'
+    };
+
+    fetch(apiUrl + "login", requestOptions)
+        .then(response => { 
+            // D'abord récupérer le texte brut
+            return response.text().then(text => {
+                // Essayer de trouver et parser le JSON dans le texte (enlever les erreurs PHP)
+                const jsonMatch = text.match(/\{.*\}/);
+                if(jsonMatch) {
+                    try {
+                        return { ok: response.ok, data: JSON.parse(jsonMatch[0]) };
+                    } catch(e) {
+                        return { ok: response.ok, text: text };
+                    }
+                }
+                return { ok: response.ok, text: text };
+            });
+        })
+        .then(result => {
+            // Vérifier que result et result.data existent
+            if(result.ok && result.data && result.data.apiToken){
+                //Il faudra récupérer le vrai token
+                const token = result.data.apiToken;
+                setToken(token);
+                //placer ce token en cookie
+                setCookie(roleCookieName, result.data.roles[0], 7);
+                window.location.replace("/");
+            } else {
+                // Afficher un message d'erreur
+                mailInput.classList.add("is-invalid");
+                PasswordInput.classList.add("is-invalid");
+                console.log("Erreur de connexion:", result.text || result.data);
+            }
+        })
+        .catch(error => console.log('error', error));
+
     }
-}

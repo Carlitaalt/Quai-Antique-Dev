@@ -46,8 +46,16 @@ function checkCredentials(){
                 //Il faudra récupérer le vrai token
                 const token = result.data.apiToken;
                 setToken(token);
+                
+                // Convertir le rôle de l'API (ex: "ROLE_CLIENT" → "client")
+                let role = result.data.roles[0];
+                if (role.startsWith('ROLE_')) {
+                    role = role.substring(5).toLowerCase();
+                }
+                
                 //placer ce token en cookie
-                setCookie(roleCookieName, result.data.roles[0], 7);
+                setCookie(roleCookieName, role, 7);
+                console.log("Rôle stocké:", role);
                 window.location.replace("/");
             } else {
                 // Afficher un message d'erreur

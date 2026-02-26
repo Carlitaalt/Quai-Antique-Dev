@@ -1,17 +1,21 @@
 const tokenCookieName = "accesstoken";
 const roleCookieName = "role";
-const apiUrl = "http://127.0.0.1:8001/api/";
+const apiUrl = "/api/";
 const signoutBtn = document.getElementById("signout-btn");
 
 signoutBtn.addEventListener("click", signOut);
 
+
+
 function getRole(){
-    return getCookie(roleCookieName);
+    const role = getCookie(roleCookieName);
+    console.log("Rôle actuel:", role);
+    return role;
 }
 
 function signOut(){
     eraseCookie(tokenCookieName);
-    eraseCookie("role");
+    eraseCookie(roleCookieName);
     window.location.replace("/signin");
 }
 
@@ -30,14 +34,14 @@ function setCookie(name, value, days){
         date.setTime(date.getTime() + (days*24*60*60*1000));
         expires = "; expires=" + date.toUTCString();
     }
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
 }
 
 function getCookie(name){
     var nameEQ = name + "=";
     var ca = document.cookie.split(';');
-    for(var i=0; i < ca.length; i++){
-        var c = ca[i];
+    for(let i=0; i < ca.length; i++){
+        let c = ca[i];
         while (c.charAt(0) == ' ') c = c.substring(1, c.length);
         if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
     }
@@ -49,20 +53,9 @@ function eraseCookie(name){
 }
 
 function isConnected(){
-    if(getToken() == null || getToken() == undefined){
-        return false;
-    } else {
-        return true;
-    }
+    // ✅ Simplifié
+    return getToken() !== null && getToken() !== undefined;
 }
-
-
-/*
-ROLE : 
--disconnected
--connected (admin ou client)
--client
-*/
 
 function showAndHideElementsforRole(){
     const userConnected = isConnected();
@@ -73,25 +66,49 @@ function showAndHideElementsforRole(){
     allElementstoEdit.forEach(element => {
         switch(element.dataset.show) {
             case "disconnected":
-                if(userConnected){
-                    element.classList.add("d-none");
-                }
+                if(userConnected) element.classList.add("d-none");
                 break;
             case "connected":
-                if(!userConnected){
-                    element.classList.add("d-none");
-                }
+                if(!userConnected) element.classList.add("d-none");
                 break;
             case "admin":
-                if(!userConnected || role != "admin"){
-                    element.classList.add("d-none");
-                }
-                    break;
+                if(!userConnected || role != "admin") element.classList.add("d-none");
+                break;
             case "client":
-                if(!userConnected || role != "client"){
-                    element.classList.add("d-none");
-                }
-                    break;
+                if(!userConnected || role != "client") element.classList.add("d-none");
+                break;
         }
-    })
+    });
+}
+
+function sanitizeHtml(text) {
+    const tempHtml = document.createElement('div');
+    tempHtml.textContent = text;
+    return tempHtml.innerHTML;
+}
+
+function getInfosUser(){
+    let myHeaders = new Headers();
+    myHeaders.append("X-AUTH-TOKEN", getToken());
+
+    let requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+
+    fetch(apiUrl + "account/me", requestOptions)
+        .then(response => {
+            if(response.ok){
+                return response.json();
+            } else {
+                console.log("Erreur lors de la récupération des informations de l'utilisateur");
+            }
+        })
+        .then(result => {
+            return result;
+        })
+        .catch(error => {
+            console.error("Erreur lors de la récupération des informations de l'utilisateur :", error);
+        });
 }

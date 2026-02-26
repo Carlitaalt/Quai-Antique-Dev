@@ -24,8 +24,25 @@ const getRouteByUrl = (url) => {
 // Fonction pour charger une page en fonction de l'URL
 const LoadContentPage = async () => {
     const path = window.location.pathname;
+    
+    // Supprimer le préfixe du dossier du projet pour obtenir le chemin relatif
+    const projectFolder = "/Projet Fil Rouge/PARTIE FRONT END/Quai Antique Dev";
+    let relativePath = path;
+    if (path.startsWith(projectFolder)) {
+        relativePath = path.substring(projectFolder.length);
+    }
+    // Gérer le cas avec %20 pour les espaces
+    const projectFolderEncoded = "/Projet%20Fil%20Rouge/PARTIE%20FRONT%20END/Quai%20Antique%20Dev";
+    if (path.startsWith(projectFolderEncoded)) {
+        relativePath = path.substring(projectFolderEncoded.length);
+    }
+    // Si le chemin est vide ou juste un slash, le transformer en "/"
+    if (relativePath === "" || relativePath === "/") {
+        relativePath = "/";
+    }
+    
     // Récupération de l'URL actuelle 
-    const actualRoute = getRouteByUrl(path);
+    const actualRoute = getRouteByUrl(relativePath);
 
     //Vérifier les droits d'accès à la page
     const allRolesArray = actualRoute.authorize;

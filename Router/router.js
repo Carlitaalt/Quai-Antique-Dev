@@ -75,14 +75,26 @@ const LoadContentPage = async () => {
 
         // Ajout de la balise script au corps du document
         document.querySelector("body").appendChild(scriptTag);
-}
+    }
 
-// Changement du titre de la page
-document.title = actualRoute.title + " - " + websiteName;
+    // Changement du titre de la page
+    document.title = actualRoute.title + " - " + websiteName;
 
-//Afficher et masquer les éléments en fonciton du rôle
-showAndHideElementsforRole();
+    //Afficher et masquer les éléments en fonction du rôle
+    showAndHideElementsforRole();
 };
+
+// Event listener pour intercepter les clics sur les liens
+document.addEventListener('click', (event) => {
+    if(event.target.tagName === 'A' || event.target.closest('a')) {
+        const link = event.target.tagName === 'A' ? event.target : event.target.closest('a');
+        if(link.href && link.href.startsWith(window.location.origin)) {
+            event.preventDefault();
+            window.history.pushState({}, "", link.href);
+            LoadContentPage();
+        }
+    }
+});
 
 // Fonction pour gérer les événements de routage (clic sur les liens)
 const routeEvent = (event) => {

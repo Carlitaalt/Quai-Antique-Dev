@@ -13,7 +13,7 @@ function checkCredentials(){
     myHeaders.append("Origin", "http://localhost:3000");
 
     let raw = JSON.stringify({
-        "username": dataForm.get("email"),
+        "email": dataForm.get("email"),
         "password": dataForm.get("mdp")
     });
 
@@ -48,10 +48,13 @@ function checkCredentials(){
                 setToken(token);
                 
                 // Convertir le rôle de l'API (ex: "ROLE_CLIENT" → "client")
-                let role = result.data.roles[0];
-                if (role.startsWith('ROLE_')) {
-                    role = role.substring(5).toLowerCase();
-                }
+            let role = result.data.roles && result.data.roles.length > 0 
+            ? result.data.roles[0] 
+            : 'ROLE_USER';
+
+            if (role.startsWith('ROLE_')) {
+            role = role.substring(5).toLowerCase();
+            }
                 
                 //placer ce token en cookie
                 setCookie(roleCookieName, role, 7);

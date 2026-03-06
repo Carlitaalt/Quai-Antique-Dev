@@ -1,6 +1,6 @@
 const tokenCookieName = "accesstoken";
 const roleCookieName = "role";
-const apiUrl = "/api/";
+const apiUrl = "http://127.0.0.1:8000/api/";
 const signoutBtn = document.getElementById("signout-btn");
 
 signoutBtn.addEventListener("click", signOut);
@@ -97,7 +97,7 @@ function getInfosUser(){
         redirect: 'follow'
     };
 
-    fetch(apiUrl + "account/me", requestOptions)
+    return fetch(apiUrl + "account/me", requestOptions)
         .then(response => {
             if(response.ok){
                 return response.json();
@@ -105,10 +105,7 @@ function getInfosUser(){
                 console.log("Erreur lors de la récupération des informations de l'utilisateur");
             }
         })
-        .then(result => {
-            return result;
-        })
         .catch(error => {
-            console.error("Erreur lors de la récupération des informations de l'utilisateur :", error);
+            console.error("Erreur:", error);
         });
 }

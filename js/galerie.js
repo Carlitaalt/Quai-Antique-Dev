@@ -1,24 +1,24 @@
-const galerieImage = document.getElementById("allImages");
-
-// Charger toutes les images au démarrage
-loadImages();
+{
+    
+const defaultPhotos = [
+    {id: 1, title: "La salle de restaurant", imagePath: "images/photo-galerie1.jpg"},
+    {id: 2, title: "Des légumes de saison", imagePath: "images/photo-galerie2.jpg"},
+    {id: 3, title: "La cuisine et ses cuisiniers", imagePath: "images/photo-galerie3.jpg"},
+];
 
 function loadImages() {
-    fetch('/api/pictures')
-        .then(response => response.json())
-        .then(pictures => {
-            galerieImage.innerHTML = "";
-            pictures.forEach(picture => {
-                galerieImage.innerHTML += getImage(picture.id, picture.title, picture.imagePath);
-            });
-            showAndHideElementsforRole();
-        })
-        .catch(error => console.error("Erreur chargement images :", error));
+    const savedPhotos = JSON.parse(localStorage.getItem('galerie') || '[]');
+    const allPhotos = [...defaultPhotos, ...savedPhotos];
+    const galerieImage = document.getElementById("allImages");
+    galerieImage.innerHTML = "";
+    allPhotos.forEach(picture => {
+        galerieImage.innerHTML += getImage(picture.id, picture.title, picture.imagePath);
+    });
+    showAndHideElementsforRole();
 }
 
 function getImage(id, titre, urlImage) {
     titre = sanitizeHtml(titre);
-    urlImage = sanitizeHtml(urlImage);
 
     return `<div class="col p-3">
         <div class="image-card text-white">
@@ -33,9 +33,7 @@ function getImage(id, titre, urlImage) {
 }
 
 // Ajouter une image
-document.getElementById("btnSavePhoto").addEventListener("click", saveImage);
-
-function saveImage() {
+document.getElementById("btnSavePhoto").addEventListener("click", function(){
     const title = document.getElementById("photoTitle").value;
     const file = document.getElementById("photoFile").files[0];
 
@@ -44,45 +42,35 @@ function saveImage() {
         return;
     }
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("image", file);
+    const reader = new FileReader();
+    reader.onload = function(e){
+        const savedPhotos = JSON.parse(localStorage.getItem('galerie') || '[]');
+        savedPhotos.push({
+            id: Date.now(),
+            title: title,
+            imagePath: e.target.result
+        });
+        localStorage.setItem('galerie', JSON.stringify(savedPhotos));
 
-    fetch('/api/pictures', {
-        method: 'POST',
-        headers: { 'X-AUTH-TOKEN': getToken() },
-        body: formData
-    })
-        .then(response => response.json())
-        .then(() => {
-            loadImages();
-            document.getElementById("photoTitle").value = "";
-            document.getElementById("photoFile").value = "";
-            bootstrap.Modal.getInstance(document.getElementById("EditionPhotoModal")).hide();
-        })
-        .catch(error => console.error("Erreur ajout image :", error));
-}
+        document.getElementById("photoTitle").value = "";
+        document.getElementById("photoFile").value = "";
+        bootstrap.Modal.getInstance(document.getElementById("EditionPhotoModal")).hide();
+        loadImages();
+    };
+    reader.readAsDataURL(file);
 
-// Supprimer une image
-let imageToDeleteId = null;
+});
 
-function deleteImage(id) {
-    imageToDeleteId = id;
-}
+document.getElementById("btnDeletePhoto").addEventListener("click", function() {
+    const id = window._deleteId;
+    if (!id) return;
+    const savedPhotos = JSON.parse(localStorage.getItem('galerie') || '[]');
+    const updated = savedPhotos.filter(p => p.id !== id);
+    localStorage.setItem('galerie', JSON.stringify(updated));
+    bootstrap.Modal.getInstance(document.getElementById("DeletePhotoModal")).hide();
+    loadImages();
+});
 
-document.getElementById("btnDeletePhoto").addEventListener("click", confirmDelete);
+loadImages();
 
-function confirmDelete() {
-    if (!imageToDeleteId) return;
-
-    fetch('/api/pictures/' + imageToDeleteId, {
-        method: 'DELETE',
-        headers: { 'X-AUTH-TOKEN': getToken() }
-    })
-        .then(() => {
-            loadImages();
-            bootstrap.Modal.getInstance(document.getElementById("DeletePhotoModal")).hide();
-            imageToDeleteId = null;
-        })
-        .catch(error => console.error("Erreur suppression image :", error));
 }

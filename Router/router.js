@@ -68,13 +68,19 @@ const LoadContentPage = async () => {
 
     // Ajout du contenu Javascript
     if(actualRoute.pathJS != "") {
+        const oldScript = document.querySelector(`script[data-page-script]`);
+        if(oldScript) oldScript.remove();
+
         // Création d'une balise script
+        await new Promise((resolve) => {
         var scriptTag = document.createElement("script");
         scriptTag.setAttribute("type", "text/javascript");
-        scriptTag.setAttribute("src", actualRoute.pathJS);
+        scriptTag.setAttribute("src", actualRoute.pathJS + "?t=" + Date.now());
+        scriptTag.setAttribute("data-page-script", "true");
 
         // Ajout de la balise script au corps du document
         document.querySelector("body").appendChild(scriptTag);
+        });
     }
 
     // Changement du titre de la page

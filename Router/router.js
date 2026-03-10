@@ -23,6 +23,13 @@ const getRouteByUrl = (url) => {
 
 // Fonction pour charger une page en fonction de l'URL
 const LoadContentPage = async () => {
+
+    //Nettoyer les modales bootstrap au changement de page
+    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+
     const path = window.location.pathname;
     
     // Supprimer le préfixe du dossier du projet pour obtenir le chemin relatif
